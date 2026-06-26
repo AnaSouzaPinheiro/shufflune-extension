@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="rosegold">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shufflune</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!-- TELA: Login -->
+    <div id="screen-login" class="screen">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="ti ti-music" aria-hidden="true"></i>
+        </div>
+        <div class="brand-name">Shufflune</div>
+        <div class="brand-sub">Seu DJ particular no Spotify</div>
+        <span class="sparkles">✦ ✧ ✦</span>
+      </div>
+      <button id="btn-login" class="btn btn-primary btn-full">
+        <i class="ti ti-brand-spotify" aria-hidden="true"></i>
+        Entrar com Spotify
+      </button>
+    </div>
+
+    <!-- TELA: Selecionar playlists -->
+    <div id="screen-select" class="screen hidden">
+      <header class="top-bar">
+        <span class="top-bar-title">Shufflune</span>
+        <button id="btn-logout" class="btn-ghost-sm">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          Sair
+        </button>
+      </header>
+
+      <!-- Seletor de tema -->
+      <div
+        class="theme-bar"
+        id="theme-bar"
+        role="group"
+        aria-label="Temas"
+      ></div>
+
+      <section class="section">
+        <h2 class="section-label">Modo de mistura</h2>
+        <div class="mode-pills">
+          <button class="pill active" data-mode="interleaved">
+            Intercalado
+          </button>
+          <button class="pill" data-mode="weighted">Proporcional</button>
+          <button class="pill" data-mode="shuffle">Aleatório</button>
+        </div>
+        <div id="weight-hint" class="mode-hint" style="display:none;">
+          💡 No modo proporcional, ajuste o <strong>Peso</strong> de cada playlist selecionada abaixo.
+        </div>
+      </section>
+
+      <section class="section grow">
+        <h2 class="section-label">
+          Suas playlists
+          <span id="selected-count" class="badge">0 selecionadas</span>
+        </h2>
+
+        <!-- Campo de busca -->
+        <div class="search-wrap">
+          <i class="ti ti-search search-icon" aria-hidden="true"></i>
+          <input
+            type="search"
+            id="search-playlists"
+            class="search-input"
+            placeholder="Buscar playlist…"
+            autocomplete="off"
+          />
+        </div>
+
+        <div id="playlist-list" class="playlist-list">
+          <div class="loading-row">Carregando playlists…</div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <button id="btn-start" class="btn btn-primary btn-full" disabled>
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+          Iniciar fluxo
+        </button>
+      </footer>
+    </div>
+
+    <!-- TELA: DJ rodando -->
+    <div id="screen-playing" class="screen hidden">
+      <span class="corner-sparkles" aria-hidden="true">✦ ✧</span>
+
+      <header class="top-bar">
+        <span class="top-bar-title">Shufflune</span>
+        <button id="btn-logout-playing" class="btn-ghost-sm">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          Sair
+        </button>
+      </header>
+
+      <div class="now-playing">
+        <div class="dj-orb" aria-hidden="true">
+          <i class="ti ti-music" style="font-size: 28px"></i>
+        </div>
+        <div class="dj-label">Fluxo ativo</div>
+        <div class="dj-sub" id="playing-mode">modo intercalado fluído</div>
+        <div class="progress-info">
+          <span id="queued-count">0</span> /
+          <span id="total-count">0</span> músicas enfileiradas
+        </div>
+        <div class="progress-bar-wrap">
+          <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="active-sources">
+        <h2 class="section-label">
+          <i class="ti ti-list-music" aria-hidden="true"></i>
+          Fontes ativas
+        </h2>
+        <div id="active-sources-list" class="sources-tags"></div>
+      </div>
+
+      <footer class="footer">
+        <button id="btn-stop" class="btn btn-outline btn-full">
+          <i class="ti ti-player-stop" aria-hidden="true"></i>
+          Parar fluxo
+        </button>
+        <button id="btn-new-mix" class="btn-ghost-full">
+          <i class="ti ti-refresh" aria-hidden="true"></i>
+          Nova mistura
+        </button>
+      </footer>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

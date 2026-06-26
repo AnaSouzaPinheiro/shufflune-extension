@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Shufflune",
+  "version": "1.0.0",
+  "description": "DJ inteligente que combina suas playlists do Spotify em um fluxo contínuo.",
+  "permissions": [
+    "storage",
+    "identity",
+    "alarms",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://api.spotify.com/*",
+    "https://accounts.spotify.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/shufflune16.png",
+      "48": "icons/shufflune48.png",
+      "128": "icons/shufflune128.png"
+    },
+    "default_title": "Abrir Shufflune"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "icons": {
+    "16": "icons/shufflune16.png",
+    "48": "icons/shufflune48.png",
+    "128": "icons/shufflune128.png"
+  }
+}
