@@ -10,30 +10,37 @@
     <!-- TELA: Login -->
     <div id="screen-login" class="screen">
       <div class="brand">
-        <div class="brand-icon">
-          <i class="ti ti-music" aria-hidden="true"></i>
-        </div>
+        <div class="brand-icon"><i class="ti ti-music"></i></div>
         <div class="brand-name">Shufflune</div>
         <div class="brand-sub">Seu DJ particular no Spotify</div>
         <span class="sparkles">✦ ✧ ✦</span>
       </div>
       <button id="btn-login" class="btn btn-primary btn-full">
-        <i class="ti ti-brand-spotify" aria-hidden="true"></i>
-        Entrar com Spotify
+        <i class="ti ti-brand-spotify"></i> Entrar com Spotify
       </button>
     </div>
 
     <!-- TELA: Selecionar playlists -->
     <div id="screen-select" class="screen hidden">
       <header class="top-bar">
-        <span class="top-bar-title">Shufflune</span>
-        <button id="btn-logout" class="btn-ghost-sm">
-          <i class="ti ti-logout" aria-hidden="true"></i>
-          Sair
-        </button>
+        <span class="top-bar-title"
+          >Shufflune
+          <span class="title-sparkles" aria-hidden="true">✦ ✧</span></span
+        >
+        <div class="top-bar-actions">
+          <button
+            id="btn-history"
+            class="btn-icon"
+            title="Histórico de misturas"
+          >
+            <i class="ti ti-history"></i>
+          </button>
+          <button id="btn-logout" class="btn-ghost-sm">
+            <i class="ti ti-logout"></i> Sair
+          </button>
+        </div>
       </header>
 
-      <!-- Seletor de tema -->
       <div
         class="theme-bar"
         id="theme-bar"
@@ -50,8 +57,8 @@
           <button class="pill" data-mode="weighted">Proporcional</button>
           <button class="pill" data-mode="shuffle">Aleatório</button>
         </div>
-        <div id="weight-hint" class="mode-hint" style="display:none;">
-          💡 No modo proporcional, ajuste o <strong>Peso</strong> de cada playlist selecionada abaixo.
+        <div id="weight-hint" class="mode-hint" style="display: none">
+          💡 Ajuste o <strong>Peso</strong> de cada playlist selecionada abaixo.
         </div>
       </section>
 
@@ -60,10 +67,8 @@
           Suas playlists
           <span id="selected-count" class="badge">0 selecionadas</span>
         </h2>
-
-        <!-- Campo de busca -->
         <div class="search-wrap">
-          <i class="ti ti-search search-icon" aria-hidden="true"></i>
+          <i class="ti ti-search search-icon"></i>
           <input
             type="search"
             id="search-playlists"
@@ -72,38 +77,85 @@
             autocomplete="off"
           />
         </div>
-
         <div id="playlist-list" class="playlist-list">
           <div class="loading-row">Carregando playlists…</div>
         </div>
       </section>
 
       <footer class="footer">
+        <div class="footer-row">
+          <button
+            id="btn-filter-recent"
+            class="btn-icon-label"
+            title="Evitar músicas tocadas recentemente"
+          >
+            <i class="ti ti-clock-off"></i>
+            <span>Evitar recentes</span>
+          </button>
+          <button
+            id="btn-preview"
+            class="btn-icon-label"
+            disabled
+            title="Ver prévia da fila"
+          >
+            <i class="ti ti-eye"></i>
+            <span>Prévia</span>
+          </button>
+        </div>
         <button id="btn-start" class="btn btn-primary btn-full" disabled>
-          <i class="ti ti-player-play" aria-hidden="true"></i>
-          Iniciar fluxo
+          <i class="ti ti-player-play"></i> Iniciar fluxo
         </button>
       </footer>
     </div>
 
     <!-- TELA: DJ rodando -->
     <div id="screen-playing" class="screen hidden">
-      <span class="corner-sparkles" aria-hidden="true">✦ ✧</span>
-
       <header class="top-bar">
-        <span class="top-bar-title">Shufflune</span>
+        <span class="top-bar-title"
+          >Shufflune
+          <span class="title-sparkles" aria-hidden="true">✦ ✧</span></span
+        >
         <button id="btn-logout-playing" class="btn-ghost-sm">
-          <i class="ti ti-logout" aria-hidden="true"></i>
-          Sair
+          <i class="ti ti-logout"></i> Sair
         </button>
       </header>
 
       <div class="now-playing">
-        <div class="dj-orb" aria-hidden="true">
-          <i class="ti ti-music" style="font-size: 28px"></i>
+        <!-- Status pill -->
+        <div class="status-row">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span class="status-label">Fluxo ativo</span>
+          <span class="status-sep">·</span>
+          <span class="status-mode" id="playing-mode">intercalado</span>
         </div>
-        <div class="dj-label">Fluxo ativo</div>
-        <div class="dj-sub" id="playing-mode">modo intercalado fluído</div>
+
+        <!-- Disco de vinil -->
+        <div class="vinyl-wrap">
+          <div class="vinyl-disc">
+            <div class="vinyl-grooves"></div>
+            <div class="vinyl-label">
+              <i class="ti ti-music" style="font-size: 18px"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separador zona música -->
+        <div class="zone-sep" aria-hidden="true">
+          <span class="zone-sep-line"></span>
+          <i class="ti ti-music" class="zone-sep-icon"></i>
+          <span class="zone-sep-line"></span>
+        </div>
+
+        <!-- Tocando agora -->
+        <div id="now-playing-info" class="now-playing-info"></div>
+
+        <!-- Separador zona progresso -->
+        <div class="zone-sep" aria-hidden="true">
+          <span class="zone-sep-line"></span>
+          <i class="ti ti-progress" class="zone-sep-icon"></i>
+          <span class="zone-sep-line"></span>
+        </div>
+
         <div class="progress-info">
           <span id="queued-count">0</span> /
           <span id="total-count">0</span> músicas enfileiradas
@@ -113,24 +165,60 @@
         </div>
       </div>
 
+      <!-- Próximas na fila -->
+      <div class="up-next-section">
+        <h2 class="section-label">
+          <i class="ti ti-list-details"></i> A seguir
+        </h2>
+        <div id="up-next-list" class="up-next-list"></div>
+      </div>
+
       <div class="active-sources">
         <h2 class="section-label">
-          <i class="ti ti-list-music" aria-hidden="true"></i>
-          Fontes ativas
+          <i class="ti ti-list-music"></i> Fontes ativas
         </h2>
         <div id="active-sources-list" class="sources-tags"></div>
       </div>
 
       <footer class="footer">
         <button id="btn-stop" class="btn btn-outline btn-full">
-          <i class="ti ti-player-stop" aria-hidden="true"></i>
-          Parar fluxo
+          <i class="ti ti-player-stop"></i> Parar fluxo
         </button>
         <button id="btn-new-mix" class="btn-ghost-full">
-          <i class="ti ti-refresh" aria-hidden="true"></i>
-          Nova mistura
+          <i class="ti ti-refresh"></i> Nova mistura
         </button>
       </footer>
+    </div>
+
+    <!-- ============================================================
+         MODAL: Preview da fila
+    ============================================================ -->
+    <div id="modal-preview" class="modal hidden">
+      <div class="modal-box">
+        <div class="modal-header">
+          <span class="modal-title">Prévia da fila</span>
+          <button id="btn-close-preview" class="modal-close">✕</button>
+        </div>
+        <div id="preview-body" class="modal-body"></div>
+        <div class="modal-footer">
+          <button id="btn-start-from-preview" class="btn btn-primary btn-full">
+            <i class="ti ti-player-play"></i> Iniciar com essa ordem
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL: Histórico de misturas
+    ============================================================ -->
+    <div id="modal-history" class="modal hidden">
+      <div class="modal-box">
+        <div class="modal-header">
+          <span class="modal-title">Histórico</span>
+          <button id="btn-close-history" class="modal-close">✕</button>
+        </div>
+        <div id="history-body" class="modal-body"></div>
+      </div>
     </div>
 
     <script src="popup.js"></script>

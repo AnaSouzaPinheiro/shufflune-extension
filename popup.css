@@ -419,53 +419,79 @@ body {
    NOW PLAYING
    ============================================================ */
 .now-playing {
-  padding: 36px 16px 20px;
+  padding: 14px 16px 12px;
   text-align: center;
   border-bottom: 1px solid var(--ph-border);
 }
 
-.dj-orb {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: var(--ph-gradient);
-  margin: 0 auto 16px;
+/* pill de status */
+.status-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 38px;
-  color: #fff;
-  animation: orb-pulse 3s ease-in-out infinite;
-  box-shadow: var(--ph-orb-glow);
+  gap: 5px;
+  margin-bottom: 10px;
 }
 
-@keyframes orb-pulse {
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ph-accent);
+  animation: blink-dot 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes blink-dot {
   0%,
   100% {
-    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: scale(1.07);
+    opacity: 0.3;
   }
 }
 
-.dj-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--ph-accent);
+.status-label {
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
-  margin-bottom: 3px;
+  letter-spacing: 0.8px;
+  color: var(--ph-accent);
 }
 
-.dj-sub {
+.status-sep {
   font-size: 11px;
   color: var(--ph-muted);
-  margin-bottom: 14px;
 }
 
-.progress-info {
+.status-mode {
   font-size: 11px;
+  color: var(--ph-muted);
+}
+
+/* separadores de zona */
+.zone-sep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.zone-sep-line {
+  flex: 1;
+  height: 1px;
+  background: var(--ph-border);
+}
+
+.zone-sep .ti {
+  font-size: 12px;
+  color: var(--ph-border);
+}
+
+/* progresso */
+.progress-info {
+  font-size: 13px;
   color: var(--ph-muted);
   margin-bottom: 8px;
 }
@@ -482,6 +508,91 @@ body {
   background: var(--ph-gradient);
   border-radius: 3px;
   transition: width 0.5s ease;
+}
+
+/* ============================================================
+   TITLE SPARKLES
+   ============================================================ */
+.title-sparkles {
+  font-size: 9px;
+  color: var(--ph-accent);
+  opacity: 0.6;
+  animation: twinkle 2.5s ease-in-out infinite alternate;
+  letter-spacing: 2px;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   DISCO DE VINIL
+   ============================================================ */
+.vinyl-wrap {
+  margin: 0 auto 4px;
+  width: 88px;
+  height: 88px;
+  position: relative;
+}
+
+.vinyl-disc {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    #1a1a1a 0%,
+    #111 60%,
+    #000 100%
+  );
+  position: relative;
+  animation: vinyl-spin 4s linear infinite;
+  box-shadow:
+    0 0 0 1px #333,
+    var(--ph-orb-glow);
+}
+
+@keyframes vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vinyl-grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0px,
+    transparent 4px,
+    rgba(255, 255, 255, 0.04) 4px,
+    rgba(255, 255, 255, 0.04) 5px
+  );
+}
+
+.vinyl-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ph-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.vinyl-label::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #111;
 }
 
 /* ============================================================
@@ -715,7 +826,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   padding: 0;
   font-family: "DM Sans", sans-serif;
 }
@@ -794,4 +907,403 @@ body {
 
 .mode-hint strong {
   color: var(--ph-text);
+}
+
+/* ============================================================
+   AVISO DE FILA SUJA
+   ============================================================ */
+.queue-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 12px 8px;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--ph-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ph-accent) 30%, transparent);
+  border-radius: 10px;
+  font-size: 10.5px;
+  color: var(--ph-muted);
+  line-height: 1.45;
+}
+
+.queue-warning i {
+  color: var(--ph-accent);
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.queue-warning span {
+  flex: 1;
+}
+
+.queue-warning-close {
+  background: none;
+  border: none;
+  color: var(--ph-muted);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  flex-shrink: 0;
+  opacity: 0.6;
+  line-height: 1;
+  align-self: flex-start;
+}
+
+.queue-warning-close:hover {
+  opacity: 1;
+}
+
+/* ============================================================
+   TOP BAR ACTIONS
+   ============================================================ */
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--ph-border);
+  border-radius: 8px;
+  color: var(--ph-muted);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-icon:hover {
+  border-color: var(--ph-accent);
+  color: var(--ph-accent);
+}
+
+/* ============================================================
+   FOOTER ROW — filtro + preview
+   ============================================================ */
+.footer-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.btn-icon-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid var(--ph-border);
+  border-radius: 10px;
+  color: var(--ph-muted);
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-icon-label i {
+  font-size: 13px;
+}
+
+.btn-icon-label:hover:not(:disabled) {
+  border-color: var(--ph-accent);
+  color: var(--ph-text);
+}
+
+.btn-icon-label.active {
+  border-color: var(--ph-accent);
+  background: color-mix(in srgb, var(--ph-accent) 12%, transparent);
+  color: var(--ph-accent);
+}
+
+.btn-icon-label:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   TOCANDO AGORA
+   ============================================================ */
+.now-playing-info {
+  margin: 6px 0 4px;
+  text-align: center;
+  min-height: 36px;
+}
+
+.np-track {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ph-text);
+  line-height: 1.3;
+  max-width: 200px;
+  margin: 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.np-artist {
+  font-size: 10.5px;
+  color: var(--ph-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.np-source {
+  font-size: 10px;
+  color: var(--ph-accent);
+  margin-top: 1px;
+  opacity: 0.85;
+}
+
+/* ============================================================
+   A SEGUIR (UP NEXT)
+   ============================================================ */
+.up-next-section {
+  padding: 0 14px 8px;
+}
+
+.up-next-section .section-label {
+  margin-top: 9px;
+}
+
+.up-next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.up-next-row {
+  padding: 5px 8px;
+  background: var(--ph-surface);
+  border-radius: 8px;
+  border-left: 2px solid var(--ph-accent);
+}
+
+.up-next-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ph-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.up-next-meta {
+  font-size: 11px;
+  color: var(--ph-muted);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.up-next-source {
+  color: var(--ph-accent);
+  opacity: 0.8;
+}
+
+/* ============================================================
+   MODAIS
+   ============================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-box {
+  width: 100%;
+  max-height: 80vh;
+  background: var(--ph-card);
+  border-radius: 18px 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--ph-border);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--ph-border);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ph-text);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--ph-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.modal-close:hover {
+  color: var(--ph-text);
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-footer {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--ph-border);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   PREVIEW ROWS
+   ============================================================ */
+.preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--ph-surface);
+  border-radius: 8px;
+}
+
+.preview-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ph-accent);
+  min-width: 18px;
+  text-align: right;
+}
+
+.preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ph-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-meta {
+  font-size: 10px;
+  color: var(--ph-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.preview-source {
+  color: var(--ph-accent);
+  opacity: 0.85;
+}
+
+/* ============================================================
+   HISTÓRICO
+   ============================================================ */
+.history-entry {
+  background: var(--ph-surface);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-mode {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ph-accent);
+  background: color-mix(in srgb, var(--ph-accent) 12%, transparent);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.history-date {
+  font-size: 10px;
+  color: var(--ph-muted);
+}
+
+.history-playlists {
+  font-size: 11px;
+  color: var(--ph-text);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.history-stats {
+  font-size: 10px;
+  color: var(--ph-muted);
+}
+
+.btn-repeat-mix {
+  align-self: flex-start;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--ph-border);
+  border-radius: 8px;
+  color: var(--ph-muted);
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-repeat-mix:hover {
+  border-color: var(--ph-accent);
+  color: var(--ph-accent);
 }

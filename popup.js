@@ -41,9 +41,9 @@ async function loadSavedTheme() {
 // ESTADO DO POPUP
 // ============================================================
 let allPlaylists = [];
-// Map: id → { id, name, weight, sortOrder, ...outros campos }
-let selectedPlaylists = new Map();
+let selectedPlaylists = new Map(); // id → { id, name, weight, sortOrder, ... }
 let currentMode = "interleaved";
+let filterRecent = false;
 let pollingInterval = null;
 let startFlowInProgress = false;
 let searchQuery = "";
@@ -58,11 +58,15 @@ function send(type, payload = {}) {
 }
 
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
+  document
+    .querySelectorAll(".screen")
+    .forEach((s) => s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
-function $(id) { return document.getElementById(id); }
+function $(id) {
+  return document.getElementById(id);
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -70,6 +74,16 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function formatMode(mode) {
+  return (
+    {
+      interleaved: "intercalado",
+      weighted: "proporcional",
+      shuffle: "aleatório",
+    }[mode] ?? mode
+  );
 }
 
 // ============================================================
@@ -83,7 +97,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function init() {
   const { loggedIn } = await send("AUTH_STATUS");
-
   if (!loggedIn) {
     showScreen("screen-login");
     bindLogin();
@@ -92,6 +105,17 @@ async function init() {
 
   const status = await send("DJ_STATUS");
   if (status.isRunning) {
+    if (status.sources?.length) {
+      status.sources.forEach((s) => {
+        if (!selectedPlaylists.has(s.id))
+          selectedPlaylists.set(s.id, {
+            id: s.id,
+            name: s.name,
+            weight: 1,
+            sortOrder: "original",
+          });
+      });
+    }
     showScreen("screen-playing");
     bindPlaying();
     startStatusPolling();
@@ -108,8 +132,7 @@ async function init() {
 // ============================================================
 function bindLogin() {
   $("btn-login").addEventListener("click", async () => {
-    $("btn-login").innerHTML =
-      '<i class="ti ti-loader" aria-hidden="true"></i> Conectando…';
+    $("btn-login").innerHTML = '<i class="ti ti-loader"></i> Conectando…';
     $("btn-login").disabled = true;
     const res = await send("AUTH_LOGIN");
     if (res?.ok) {
@@ -135,20 +158,19 @@ function bindSelect() {
 
   document.querySelectorAll(".pill").forEach((pill) => {
     pill.addEventListener("click", () => {
-      document.querySelectorAll(".pill").forEach((p) => p.classList.remove("active"));
+      document
+        .querySelectorAll(".pill")
+        .forEach((p) => p.classList.remove("active"));
       pill.classList.add("active");
       currentMode = pill.dataset.mode;
-      // Dica de peso só no modo proporcional
       const weightHint = $("weight-hint");
-      if (weightHint) {
-        weightHint.style.display = currentMode === "weighted" ? "block" : "none";
-      }
-      // Re-renderiza lista para atualizar quais extras aparecem
+      if (weightHint)
+        weightHint.style.display =
+          currentMode === "weighted" ? "block" : "none";
       if (allPlaylists.length) renderPlaylistList(allPlaylists);
     });
   });
 
-  // Campo de busca
   const searchInput = $("search-playlists");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
@@ -157,7 +179,27 @@ function bindSelect() {
     });
   }
 
+  // Toggle filtro de recentes
+  const filterBtn = $("btn-filter-recent");
+  if (filterBtn) {
+    filterBtn.addEventListener("click", () => {
+      filterRecent = !filterRecent;
+      filterBtn.classList.toggle("active", filterRecent);
+      filterBtn.title = filterRecent
+        ? "Filtro ativo: músicas recentes serão evitadas"
+        : "Evitar músicas tocadas recentemente";
+    });
+  }
+
   $("btn-start").addEventListener("click", startFlow);
+
+  // Botão de preview
+  const previewBtn = $("btn-preview");
+  if (previewBtn) previewBtn.addEventListener("click", showPreview);
+
+  // Botão histórico
+  const histBtn = $("btn-history");
+  if (histBtn) histBtn.addEventListener("click", showHistory);
 }
 
 async function loadPlaylists() {
@@ -173,19 +215,15 @@ async function loadPlaylists() {
   renderPlaylistList(playlists);
 }
 
-/**
- * Quais controles mostrar dependem do modo:
- *   weighted    → Peso (stepper)
- *   interleaved → Ordem (select)
- *   shuffle     → nenhum (tudo vai pro pool global de qualquer forma)
- */
+// ============================================================
+// CONTROLES EXTRAS POR MODO
+// ============================================================
 function extrasForMode() {
   if (currentMode === "weighted") return "weight";
   if (currentMode === "interleaved") return "sort";
   return "none";
 }
 
-/** Cria o bloco de extras DOM para uma playlist já selecionada */
 function buildExtrasDiv(pl, entry) {
   const kind = extrasForMode();
   if (kind === "none") return null;
@@ -204,23 +242,19 @@ function buildExtrasDiv(pl, entry) {
         <button class="stepper-btn stepper-dec" type="button">−</button>
         <span class="stepper-value">${weight}</span>
         <button class="stepper-btn stepper-inc" type="button">+</button>
-      </div>
-    `;
+      </div>`;
     div.appendChild(label);
-
     const valEl = label.querySelector(".stepper-value");
     label.querySelector(".stepper-dec").addEventListener("click", (e) => {
       e.stopPropagation();
-      const cur = entry.weight ?? 1;
-      const next = Math.max(1, cur - 1);
+      const next = Math.max(1, (entry.weight ?? 1) - 1);
       entry.weight = next;
       selectedPlaylists.set(pl.id, entry);
       valEl.textContent = next;
     });
     label.querySelector(".stepper-inc").addEventListener("click", (e) => {
       e.stopPropagation();
-      const cur = entry.weight ?? 1;
-      const next = Math.min(10, cur + 1);
+      const next = Math.min(10, (entry.weight ?? 1) + 1);
       entry.weight = next;
       selectedPlaylists.set(pl.id, entry);
       valEl.textContent = next;
@@ -236,13 +270,11 @@ function buildExtrasDiv(pl, entry) {
       <div class="sort-select-wrap">
         <select class="sort-select">
           <option value="original" ${sortOrder === "original" ? "selected" : ""}>Original</option>
-          <option value="shuffle" ${sortOrder === "shuffle" ? "selected" : ""}>Embaralhar</option>
+          <option value="shuffle"  ${sortOrder === "shuffle" ? "selected" : ""}>Embaralhar</option>
         </select>
         <span class="sort-caret">▾</span>
-      </div>
-    `;
+      </div>`;
     div.appendChild(label);
-
     label.querySelector(".sort-select").addEventListener("change", (e) => {
       e.stopPropagation();
       entry.sortOrder = e.target.value;
@@ -253,15 +285,18 @@ function buildExtrasDiv(pl, entry) {
   return div;
 }
 
+// ============================================================
+// LISTA DE PLAYLISTS
+// ============================================================
 function renderPlaylistList(playlists) {
   const list = $("playlist-list");
-
   const filtered = searchQuery
     ? playlists.filter((pl) => pl.name.toLowerCase().includes(searchQuery))
     : playlists;
 
   if (!filtered.length) {
-    list.innerHTML = '<div class="loading-row">Nenhuma playlist encontrada.</div>';
+    list.innerHTML =
+      '<div class="loading-row">Nenhuma playlist encontrada.</div>';
     return;
   }
 
@@ -269,7 +304,6 @@ function renderPlaylistList(playlists) {
   filtered.forEach((pl) => {
     const sel = selectedPlaylists.get(pl.id);
     const isSelected = !!sel;
-
     const item = document.createElement("div");
     item.className = "playlist-item" + (isSelected ? " selected" : "");
     item.dataset.id = pl.id;
@@ -277,7 +311,7 @@ function renderPlaylistList(playlists) {
     const imgUrl = pl.images?.[0]?.url;
     const thumbEl = imgUrl
       ? `<div class="playlist-thumb"><img src="${escapeHtml(imgUrl)}" alt="" /></div>`
-      : `<div class="playlist-thumb"><i class="ti ti-music" aria-hidden="true"></i></div>`;
+      : `<div class="playlist-thumb"><i class="ti ti-music"></i></div>`;
 
     item.innerHTML = `
       ${thumbEl}
@@ -285,21 +319,18 @@ function renderPlaylistList(playlists) {
         <div class="playlist-name">${escapeHtml(pl.name)}</div>
         <div class="playlist-tracks">${pl.items?.total ?? pl.tracks?.total ?? "?"} músicas</div>
       </div>
-      <div class="playlist-check">
-        ${isSelected ? '<i class="ti ti-check" style="font-size:10px"></i>' : ""}
-      </div>
-    `;
+      <div class="playlist-check">${isSelected ? '<i class="ti ti-check" style="font-size:10px"></i>' : ""}</div>`;
 
     if (isSelected && sel) {
       const extrasDiv = buildExtrasDiv(pl, sel);
-      if (extrasDiv) item.querySelector(".playlist-info").appendChild(extrasDiv);
+      if (extrasDiv)
+        item.querySelector(".playlist-info").appendChild(extrasDiv);
     }
 
     item.addEventListener("click", (e) => {
       if (e.target.closest(".playlist-extras")) return;
       togglePlaylist(pl, item);
     });
-
     list.appendChild(item);
   });
 }
@@ -309,8 +340,7 @@ function togglePlaylist(pl, item) {
     selectedPlaylists.delete(pl.id);
     item.classList.remove("selected");
     item.querySelector(".playlist-check").innerHTML = "";
-    const extras = item.querySelector(".playlist-extras");
-    if (extras) extras.remove();
+    item.querySelector(".playlist-extras")?.remove();
   } else {
     const entry = {
       id: pl.id,
@@ -324,93 +354,210 @@ function togglePlaylist(pl, item) {
     item.classList.add("selected");
     item.querySelector(".playlist-check").innerHTML =
       '<i class="ti ti-check" style="font-size:10px"></i>';
-
     const infoDiv = item.querySelector(".playlist-info");
     if (infoDiv) {
       const extrasDiv = buildExtrasDiv(pl, entry);
       if (extrasDiv) infoDiv.appendChild(extrasDiv);
     }
   }
-
   const count = selectedPlaylists.size;
-  $("selected-count").textContent = `${count} selecionada${count !== 1 ? "s" : ""}`;
+  $("selected-count").textContent =
+    `${count} selecionada${count !== 1 ? "s" : ""}`;
   $("btn-start").disabled = count < 2;
+  if ($("btn-preview")) $("btn-preview").disabled = count < 2;
 }
 
-async function startFlow() {
-  if (startFlowInProgress) return;
-  startFlowInProgress = true;
+// ============================================================
+// PREVIEW DA FILA
+// ============================================================
+async function showPreview() {
+  const modal = $("modal-preview");
+  const body = $("preview-body");
+  if (!modal || !body) return;
 
-  const btn = $("btn-start");
-  btn.innerHTML =
-    '<i class="ti ti-loader" aria-hidden="true"></i> Carregando faixas…';
-  btn.disabled = true;
+  body.innerHTML = '<div class="loading-row">Gerando preview…</div>';
+  modal.classList.remove("hidden");
 
   const selected = Array.from(selectedPlaylists.values());
-
-  const res = await send("START_DJ", {
+  const res = await send("PREVIEW_QUEUE", {
     selectedPlaylists: selected,
     mode: currentMode,
   });
 
+  if (res?.error || !res?.preview?.length) {
+    body.innerHTML =
+      '<div class="loading-row">Não foi possível gerar preview.</div>';
+    return;
+  }
+
+  body.innerHTML = res.preview
+    .map(
+      (t, i) => `
+    <div class="preview-row">
+      <span class="preview-num">${i + 1}</span>
+      <div class="preview-info">
+        <div class="preview-name">${escapeHtml(t.name)}</div>
+        <div class="preview-meta">${escapeHtml(t.artistNames)} · <span class="preview-source">${escapeHtml(t.sourceName)}</span></div>
+      </div>
+    </div>`,
+    )
+    .join("");
+
+  $("btn-close-preview").onclick = () => modal.classList.add("hidden");
+  $("btn-start-from-preview").onclick = () => {
+    modal.classList.add("hidden");
+    startFlow();
+  };
+}
+
+// ============================================================
+// HISTÓRICO DE MISTURAS
+// ============================================================
+async function showHistory() {
+  const modal = $("modal-history");
+  const body = $("history-body");
+  if (!modal || !body) return;
+
+  modal.classList.remove("hidden");
+  body.innerHTML = '<div class="loading-row">Carregando…</div>';
+
+  const { history } = await send("GET_HISTORY");
+
+  if (!history?.length) {
+    body.innerHTML = '<div class="loading-row">Nenhuma mistura anterior.</div>';
+    $("btn-close-history").onclick = () => modal.classList.add("hidden");
+    return;
+  }
+
+  body.innerHTML = history
+    .map((entry) => {
+      const date = new Date(entry.startedAt).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const names = entry.playlists.map((p) => escapeHtml(p.name)).join(", ");
+      return `
+    <div class="history-entry" data-id="${entry.id}">
+      <div class="history-meta">
+        <span class="history-mode">${escapeHtml(formatMode(entry.mode))}</span>
+        <span class="history-date">${date}</span>
+      </div>
+      <div class="history-playlists">${names}</div>
+      <div class="history-stats">${entry.totalTracks} músicas</div>
+      <button class="btn-repeat-mix" data-entry='${escapeHtml(JSON.stringify(entry))}'>
+        <i class="ti ti-refresh"></i> Repetir
+      </button>
+    </div>`;
+    })
+    .join("");
+
+  body.querySelectorAll(".btn-repeat-mix").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const entry = JSON.parse(btn.dataset.entry);
+      modal.classList.add("hidden");
+      await repeatMix(entry);
+    });
+  });
+
+  $("btn-close-history").onclick = () => modal.classList.add("hidden");
+}
+
+async function repeatMix(entry) {
+  const btn = $("btn-start");
+  btn.innerHTML = '<i class="ti ti-loader"></i> Repetindo mistura…';
+  btn.disabled = true;
+
+  const res = await send("REPEAT_MIX", { entry });
+  if (res?.ok) {
+    showScreen("screen-playing");
+    // Reconstrói selectedPlaylists a partir do histórico
+    selectedPlaylists.clear();
+    entry.playlists.forEach((p) =>
+      selectedPlaylists.set(p.id, {
+        id: p.id,
+        name: p.name,
+        weight: p.weight,
+        sortOrder: p.sortOrder,
+      }),
+    );
+    bindPlaying();
+    startStatusPolling();
+  } else {
+    btn.innerHTML = '<i class="ti ti-player-play"></i> Iniciar fluxo';
+    btn.disabled = selectedPlaylists.size < 2;
+    alert("Erro ao repetir mistura: " + (res?.error || "tente novamente"));
+  }
+}
+
+// ============================================================
+// INICIAR FLUXO
+// ============================================================
+async function startFlow() {
+  if (startFlowInProgress) return;
+  startFlowInProgress = true;
+  const btn = $("btn-start");
+  btn.innerHTML = '<i class="ti ti-loader"></i> Carregando faixas…';
+  btn.disabled = true;
+
+  const selected = Array.from(selectedPlaylists.values());
+  const res = await send("START_DJ", {
+    selectedPlaylists: selected,
+    mode: currentMode,
+    filterRecent,
+  });
   startFlowInProgress = false;
 
   if (res?.ok) {
-    if (res.skipped > 0) {
-      console.warn("Shufflune: playlists puladas:", res.skippedPlaylists || res.skipped);
-    }
     showScreen("screen-playing");
     bindPlaying();
     startStatusPolling();
   } else {
     btn.innerHTML = '<i class="ti ti-player-play"></i> Iniciar fluxo';
     btn.disabled = false;
-    if (res?.skippedPlaylists?.length) {
-      const forbidden = res.skippedPlaylists.find((pl) => pl.reason === "forbidden");
-      if (forbidden) {
-        alert(
-          'Erro ao iniciar: a playlist "' + forbidden.name +
-          '" não está acessível para leitura. ' +
-          "Verifique se você é proprietário ou colaborador dessa playlist e tente novamente.",
-        );
-        return;
-      }
-    }
-    alert(
-      "Erro ao iniciar: " +
-        (res?.error || "verifique se o Spotify está aberto e tocando."),
+    const forbidden = res?.skippedPlaylists?.find(
+      (pl) => pl.reason === "forbidden",
     );
+    if (forbidden) {
+      alert(
+        `Erro: a playlist "${forbidden.name}" não é acessível. Verifique se você é dono ou colaborador.`,
+      );
+    } else {
+      alert(
+        "Erro ao iniciar: " +
+          (res?.error || "verifique se o Spotify está aberto e tocando."),
+      );
+    }
   }
 }
 
 // ============================================================
-// RESET DE ESTADO — chamado ao parar o DJ
+// RESET DE ESTADO
 // ============================================================
 function resetSelectState() {
-  // Reset completo: seleções, busca, botão
   selectedPlaylists.clear();
   searchQuery = "";
+  filterRecent = false;
   const searchInput = $("search-playlists");
   if (searchInput) searchInput.value = "";
-
-  // Reset botão iniciar
   const btn = $("btn-start");
   if (btn) {
-    btn.innerHTML = '<i class="ti ti-player-play" aria-hidden="true"></i> Iniciar fluxo';
+    btn.innerHTML = '<i class="ti ti-player-play"></i> Iniciar fluxo';
     btn.disabled = true;
   }
-
-  // Reset contador
+  const previewBtn = $("btn-preview");
+  if (previewBtn) previewBtn.disabled = true;
+  const filterBtn = $("btn-filter-recent");
+  if (filterBtn) filterBtn.classList.remove("active");
   const countEl = $("selected-count");
   if (countEl) countEl.textContent = "0 selecionadas";
-
-  // Reset pills de modo
-  document.querySelectorAll(".pill").forEach((p) => {
-    p.classList.toggle("active", p.dataset.mode === "interleaved");
-  });
+  document
+    .querySelectorAll(".pill")
+    .forEach((p) =>
+      p.classList.toggle("active", p.dataset.mode === "interleaved"),
+    );
   currentMode = "interleaved";
-
-  // Limpa polling se ainda ativo
   if (pollingInterval) {
     clearInterval(pollingInterval);
     pollingInterval = null;
@@ -429,34 +576,65 @@ function bindPlaying() {
     bindSelect();
     loadPlaylists();
   };
-
   $("btn-stop").addEventListener("click", handleStop);
   $("btn-new-mix").addEventListener("click", handleStop);
-
   $("btn-logout-playing").addEventListener("click", async () => {
     await send("AUTH_LOGOUT");
     resetSelectState();
     showScreen("screen-login");
     bindLogin();
   });
-
   renderActiveSources();
 }
 
-function renderActiveSources() {
+function renderActiveSources(sources) {
   const container = $("active-sources-list");
   if (!container) return;
-  const names = Array.from(selectedPlaylists.values()).map((pl) => pl.name);
-  container.innerHTML = names
+  const items = sources?.length
+    ? sources
+    : Array.from(selectedPlaylists.values()).map((pl) => ({ name: pl.name }));
+  container.innerHTML = items
     .map(
-      (n) => `
+      (s) => `
     <span class="source-tag">
       <span class="source-dot"></span>
-      ${escapeHtml(n)}
-    </span>
-  `,
+      ${escapeHtml(s.name)}
+    </span>`,
     )
     .join("");
+}
+
+function renderNowPlaying(status) {
+  const np = $("now-playing-info");
+  if (!np) return;
+
+  // Tenta achar a música atual na queue pelo URI
+  const current = status.nowPlaying;
+  if (current) {
+    np.innerHTML = `
+      <div class="np-track">${escapeHtml(current.name)}</div>
+      <div class="np-artist">${escapeHtml(current.artistNames ?? "")}</div>
+      <div class="np-source">${escapeHtml(current.sourceName ?? "")}</div>`;
+  } else {
+    np.innerHTML = "";
+  }
+
+  // Próximas da fila
+  const upNextEl = $("up-next-list");
+  if (!upNextEl) return;
+  if (status.upNext?.length) {
+    upNextEl.innerHTML = status.upNext
+      .map(
+        (t) => `
+      <div class="up-next-row">
+        <div class="up-next-name">${escapeHtml(t.name)}</div>
+        <div class="up-next-meta">${escapeHtml(t.artistNames ?? "")} · <span class="up-next-source">${escapeHtml(t.sourceName ?? "")}</span></div>
+      </div>`,
+      )
+      .join("");
+  } else {
+    upNextEl.innerHTML = "";
+  }
 }
 
 function startStatusPolling() {
@@ -479,12 +657,21 @@ async function updateDJStatus() {
   if ($("queued-count")) $("queued-count").textContent = queued;
   if ($("total-count")) $("total-count").textContent = total;
   if ($("progress-bar")) $("progress-bar").style.width = pct + "%";
-
-  const modeLabels = {
-    interleaved: "modo intercalado fluído",
-    weighted: "modo proporcional",
-    shuffle: "modo aleatório",
-  };
   if ($("playing-mode"))
-    $("playing-mode").textContent = modeLabels[status.mode] || status.mode;
+    $("playing-mode").textContent = formatMode(status.mode);
+
+  if (status.sources?.length) {
+    status.sources.forEach((s) => {
+      if (!selectedPlaylists.has(s.id))
+        selectedPlaylists.set(s.id, {
+          id: s.id,
+          name: s.name,
+          weight: 1,
+          sortOrder: "original",
+        });
+    });
+    renderActiveSources(status.sources);
+  }
+
+  renderNowPlaying(status);
 }
