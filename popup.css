@@ -1,9 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@300;400;500;600&display=swap");
 @import url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css");
 
-/* ============================================================
-   TEMAS
-   ============================================================ */
+/* TEMAS */
 :root {
   --ph-bg: linear-gradient(160deg, #1f1018 0%, #120a0e 100%);
   --ph-border: #4a2535;
@@ -79,9 +77,7 @@
   --ph-orb-glow: 0 0 30px rgba(251, 191, 36, 0.35);
 }
 
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
+/* RESET & BASE */
 *,
 *::before,
 *::after {
@@ -101,9 +97,7 @@ body {
   flex-direction: column;
 }
 
-/* ============================================================
-   TELAS
-   ============================================================ */
+/* TELAS */
 .screen {
   display: flex;
   flex-direction: column;
@@ -113,9 +107,7 @@ body {
   display: none;
 }
 
-/* ============================================================
-   LOGIN
-   ============================================================ */
+/* LOGIN */
 #screen-login {
   align-items: center;
   justify-content: center;
@@ -174,9 +166,7 @@ body {
   }
 }
 
-/* ============================================================
-   TOP BAR
-   ============================================================ */
+/* TOP BAR */
 .top-bar {
   display: flex;
   align-items: center;
@@ -192,9 +182,7 @@ body {
   line-height: 1.6;
 }
 
-/* ============================================================
-   SELETOR DE TEMA
-   ============================================================ */
+/* SELETOR DE TEMA */
 .theme-bar {
   display: flex;
   gap: 6px;
@@ -227,9 +215,7 @@ body {
   transform: scale(1.15);
 }
 
-/* ============================================================
-   SECTIONS
-   ============================================================ */
+/* SECTIONS */
 .section {
   padding: 12px 16px 6px;
 }
@@ -255,9 +241,7 @@ body {
   gap: 8px;
 }
 
-/* ============================================================
-   MODO PILLS
-   ============================================================ */
+/* MODO PILLS */
 .mode-pills {
   display: flex;
   gap: 6px;
@@ -289,9 +273,7 @@ body {
   font-weight: 700;
 }
 
-/* ============================================================
-   PLAYLIST LIST
-   ============================================================ */
+/* PLAYLIST LIST */
 .playlist-list {
   flex: 1;
   overflow-y: auto;
@@ -400,9 +382,7 @@ body {
   font-size: 13px;
 }
 
-/* ============================================================
-   BADGE
-   ============================================================ */
+/* BADGE */
 .badge {
   background: var(--ph-card-sel);
   color: var(--ph-accent);
@@ -415,9 +395,7 @@ body {
   letter-spacing: 0;
 }
 
-/* ============================================================
-   NOW PLAYING
-   ============================================================ */
+/* NOW PLAYING */
 .now-playing {
   padding: 14px 16px 12px;
   text-align: center;
@@ -510,9 +488,7 @@ body {
   transition: width 0.5s ease;
 }
 
-/* ============================================================
-   TITLE SPARKLES
-   ============================================================ */
+/* TITLE SPARKLES */
 .title-sparkles {
   font-size: 9px;
   color: var(--ph-accent);
@@ -522,9 +498,7 @@ body {
   vertical-align: middle;
 }
 
-/* ============================================================
-   DISCO DE VINIL
-   ============================================================ */
+/* DISCO DE VINIL */
 .vinyl-wrap {
   margin: 0 auto 4px;
   width: 88px;
@@ -595,9 +569,7 @@ body {
   background: #111;
 }
 
-/* ============================================================
-   ACTIVE SOURCES
-   ============================================================ */
+/* ACTIVE SOURCES */
 .active-sources {
   padding: 12px 16px;
   flex: 1;
@@ -630,9 +602,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
+/* FOOTER */
 .footer {
   padding: 10px 16px 14px;
   border-top: 1px solid var(--ph-border);
@@ -641,9 +611,7 @@ body {
   gap: 7px;
 }
 
-/* ============================================================
-   BOTÕES
-   ============================================================ */
+/* BOTÕES */
 .btn {
   display: flex;
   align-items: center;
@@ -739,9 +707,7 @@ body {
   letter-spacing: 3px;
 }
 
-/* ============================================================
-   CAMPO DE BUSCA
-   ============================================================ */
+/* CAMPO DE BUSCA */
 .search-wrap {
   position: relative;
   margin-bottom: 8px;
@@ -779,9 +745,7 @@ body {
   color: var(--ph-muted);
 }
 
-/* ============================================================
-   CONTROLES EXTRAS DE PLAYLIST (peso + ordem)
-   ============================================================ */
+/* CONTROLES EXTRAS DE PLAYLIST (peso + ordem) */
 .playlist-extras {
   display: flex;
   gap: 8px;
@@ -891,9 +855,7 @@ body {
   line-height: 1;
 }
 
-/* ============================================================
-   DICA DE MODO
-   ============================================================ */
+/* DICA DE MODO */
 .mode-hint {
   margin-top: 6px;
   padding: 6px 10px;
@@ -909,9 +871,7 @@ body {
   color: var(--ph-text);
 }
 
-/* ============================================================
-   AVISO DE FILA SUJA
-   ============================================================ */
+/* AVISO DE FILA SUJA */
 .queue-warning {
   display: flex;
   align-items: flex-start;
@@ -954,9 +914,7 @@ body {
   opacity: 1;
 }
 
-/* ============================================================
-   TOP BAR ACTIONS
-   ============================================================ */
+/* TOP BAR ACTIONS */
 .top-bar-actions {
   display: flex;
   align-items: center;
@@ -984,9 +942,7 @@ body {
   color: var(--ph-accent);
 }
 
-/* ============================================================
-   FOOTER ROW — filtro + preview
-   ============================================================ */
+/* FOOTER ROW — filtro + preview */
 .footer-row {
   display: flex;
   gap: 6px;
@@ -1031,9 +987,7 @@ body {
   cursor: not-allowed;
 }
 
-/* ============================================================
-   TOCANDO AGORA
-   ============================================================ */
+/* TOCANDO AGORA */
 .now-playing-info {
   margin: 6px 0 4px;
   text-align: center;
@@ -1071,9 +1025,7 @@ body {
   opacity: 0.85;
 }
 
-/* ============================================================
-   A SEGUIR (UP NEXT)
-   ============================================================ */
+/* A SEGUIR (UP NEXT) */
 .up-next-section {
   padding: 0 14px 8px;
 }
@@ -1118,9 +1070,7 @@ body {
   opacity: 0.8;
 }
 
-/* ============================================================
-   MODAIS
-   ============================================================ */
+/* MODAIS */
 .modal {
   position: fixed;
   inset: 0;
@@ -1191,9 +1141,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ============================================================
-   PREVIEW ROWS
-   ============================================================ */
+/* PREVIEW ROWS */
 .preview-row {
   display: flex;
   align-items: center;
@@ -1239,9 +1187,7 @@ body {
   opacity: 0.85;
 }
 
-/* ============================================================
-   HISTÓRICO
-   ============================================================ */
+/* HISTÓRICO */
 .history-entry {
   background: var(--ph-surface);
   border-radius: 10px;
@@ -1306,4 +1252,11 @@ body {
 .btn-repeat-mix:hover {
   border-color: var(--ph-accent);
   color: var(--ph-accent);
+}
+
+/* Músicas Curtidas — thumb especial */
+.playlist-thumb--liked {
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44dff 100%);
+  color: #fff;
+  font-size: 18px;
 }

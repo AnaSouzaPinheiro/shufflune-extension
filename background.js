@@ -1,6 +1,4 @@
-// ============================================================
 // CONFIGURAÇÃO
-// ============================================================
 const CLIENT_ID = "SEU_CLIENT_ID_AQUI";
 const REDIRECT_URI = chrome.identity.getRedirectURL();
 const SCOPES = [
@@ -12,9 +10,7 @@ const SCOPES = [
   "user-library-read",
 ].join(" ");
 
-// ============================================================
 // ESTADO INTERNO DO DJ
-// ============================================================
 let djState = {
   isRunning: false,
   sources: [],
@@ -31,9 +27,7 @@ const QUEUE_BUFFER = 15;
 let djStartPromise = null;
 let isFilling = false; // debounce anti-duplicação no fillQueue
 
-// ============================================================
 // AUTENTICAÇÃO — OAuth PKCE (não alterar)
-// ============================================================
 let authInProgress = false;
 let authPromise = null;
 let currentUserProfile = null;
@@ -183,9 +177,7 @@ function isSpotifyForbidden(error) {
   );
 }
 
-// ============================================================
 // SPOTIFY API
-// ============================================================
 async function spotifyGet(path) {
   const token = await getAccessToken();
   if (!token) throw new Error("Sem token Spotify (não autenticado)");
@@ -229,6 +221,19 @@ async function fetchCurrentUserProfile() {
 
 async function fetchUserPlaylists() {
   const user = await fetchCurrentUserProfile();
+  const likedMeta = await spotifyGet('/me/tracks?limit=1').catch(() => null);
+  const likedEntry = likedMeta ? [{
+    id: 'liked',
+    name: 'Músicas Curtidas',
+    description: 'Suas músicas curtidas no Spotify',
+    images: [],
+    owner: { id: user.id, display_name: user.display_name },
+    collaborative: false,
+    public: false,
+    items: { total: likedMeta.total ?? 0 },
+    _isLiked: true,
+  }] : [];
+
   const playlists = [];
   let url = "/me/playlists?limit=50";
   while (url) {
@@ -243,10 +248,11 @@ async function fetchUserPlaylists() {
       ? data.next.replace("https://api.spotify.com/v1", "")
       : null;
   }
-  return playlists;
+  return [...likedEntry, ...playlists];
 }
 
 async function fetchPlaylistTracks(playlistId) {
+  if (playlistId === 'liked') return fetchLikedTracks();
   const tracks = [];
   let url = `/playlists/${encodeURIComponent(playlistId)}/items?limit=50`;
   while (url) {
@@ -284,6 +290,21 @@ async function fetchRecentlyPlayed() {
   }
 }
 
+async function fetchLikedTracks() {
+  const tracks = [];
+  let url = '/me/tracks?limit=50';
+  while (url) {
+    const data = await spotifyGet(url.startsWith('/') ? url : url.replace('https://api.spotify.com/v1', ''));
+    if (!data?.items) break;
+    const valid = data.items
+      .filter(item => item?.track?.uri && !item.track.uri.startsWith('spotify:local:') && item.track.type === 'track')
+      .map(item => ({ uri: item.track.uri, name: item.track.name, artists: item.track.artists }));
+    tracks.push(...valid);
+    url = data.next ? data.next.replace('https://api.spotify.com/v1', '') : null;
+  }
+  return tracks;
+}
+
 async function getPlaybackState() {
   try {
     const token = await getAccessToken();
@@ -308,9 +329,7 @@ async function playTrack(uri) {
   await spotifyPost("/me/player/play", { uris: [uri] });
 }
 
-// ============================================================
 // UTILITÁRIOS DE ALEATORIEDADE
-// ============================================================
 function fisherYates(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -325,9 +344,7 @@ function applySortOrder(source) {
   return { ...source, tracks };
 }
 
-// ============================================================
 // ALGORITMOS DE MISTURA
-// ============================================================
 function buildInterleavedQueue(sources) {
   const queue = [];
   const pointers = sources.map(() => 0);
@@ -455,9 +472,7 @@ function buildQueue(sources, mode, recentlyPlayedUris = new Set()) {
   }
 }
 
-// ============================================================
 // HISTÓRICO DE MISTURAS
-// ============================================================
 const HISTORY_MAX = 10;
 
 async function saveToHistory(sources, mode, totalTracks) {
@@ -485,9 +500,7 @@ async function getHistory() {
   return djHistory;
 }
 
-// ============================================================
 // MOTOR DO DJ
-// ============================================================
 async function startDJ(sources, mode, filterRecent = false) {
   djState.isRunning = true;
   djState.sources = sources;
@@ -552,9 +565,7 @@ async function loadDJState() {
   if (saved) djState = saved;
 }
 
-// ============================================================
 // ALARME — monitora e reabastece a fila
-// ============================================================
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== "djMonitor") return;
   if (!djState.isRunning) return;
@@ -576,9 +587,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   await saveDJState();
 });
 
-// ============================================================
 // PREVIEW DA FILA
-// ============================================================
 function buildPreview(sources, mode, count = 12) {
   // Gera a queue completa e retorna as primeiras `count` entradas
   const queue = buildQueue(sources, mode);
@@ -590,9 +599,7 @@ function buildPreview(sources, mode, count = 12) {
   }));
 }
 
-// ============================================================
 // MENSAGENS DO POPUP
-// ============================================================
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   handleMessage(message)
     .then(sendResponse)

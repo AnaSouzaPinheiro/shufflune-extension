@@ -1,6 +1,4 @@
-// ============================================================
 // TEMAS
-// ============================================================
 const THEMES = [
   { id: "rosegold", label: "Rose Gold", color: "#fbbf24" },
   { id: "midnight", label: "Midnight", color: "#c77dff" },
@@ -37,9 +35,7 @@ async function loadSavedTheme() {
   applyTheme(theme || "rosegold");
 }
 
-// ============================================================
 // ESTADO DO POPUP
-// ============================================================
 let allPlaylists = [];
 let selectedPlaylists = new Map(); // id → { id, name, weight, sortOrder, ... }
 let currentMode = "interleaved";
@@ -48,9 +44,7 @@ let pollingInterval = null;
 let startFlowInProgress = false;
 let searchQuery = "";
 
-// ============================================================
 // UTILITÁRIOS
-// ============================================================
 function send(type, payload = {}) {
   return new Promise((resolve) =>
     chrome.runtime.sendMessage({ type, ...payload }, resolve),
@@ -86,9 +80,7 @@ function formatMode(mode) {
   );
 }
 
-// ============================================================
 // INICIALIZAÇÃO
-// ============================================================
 document.addEventListener("DOMContentLoaded", async () => {
   await loadSavedTheme();
   buildThemeBar();
@@ -127,9 +119,7 @@ async function init() {
   loadPlaylists();
 }
 
-// ============================================================
 // TELA: LOGIN
-// ============================================================
 function bindLogin() {
   $("btn-login").addEventListener("click", async () => {
     $("btn-login").innerHTML = '<i class="ti ti-loader"></i> Conectando…';
@@ -146,9 +136,7 @@ function bindLogin() {
   });
 }
 
-// ============================================================
 // TELA: SELECIONAR PLAYLISTS
-// ============================================================
 function bindSelect() {
   $("btn-logout").addEventListener("click", async () => {
     await send("AUTH_LOGOUT");
@@ -215,9 +203,7 @@ async function loadPlaylists() {
   renderPlaylistList(playlists);
 }
 
-// ============================================================
 // CONTROLES EXTRAS POR MODO
-// ============================================================
 function extrasForMode() {
   if (currentMode === "weighted") return "weight";
   if (currentMode === "interleaved") return "sort";
@@ -285,9 +271,7 @@ function buildExtrasDiv(pl, entry) {
   return div;
 }
 
-// ============================================================
 // LISTA DE PLAYLISTS
-// ============================================================
 function renderPlaylistList(playlists) {
   const list = $("playlist-list");
   const filtered = searchQuery
@@ -309,9 +293,11 @@ function renderPlaylistList(playlists) {
     item.dataset.id = pl.id;
 
     const imgUrl = pl.images?.[0]?.url;
-    const thumbEl = imgUrl
-      ? `<div class="playlist-thumb"><img src="${escapeHtml(imgUrl)}" alt="" /></div>`
-      : `<div class="playlist-thumb"><i class="ti ti-music"></i></div>`;
+    const thumbEl = pl._isLiked
+      ? `<div class="playlist-thumb playlist-thumb--liked"><i class="ti ti-heart-filled"></i></div>`
+      : imgUrl
+        ? `<div class="playlist-thumb"><img src="${escapeHtml(imgUrl)}" alt="" /></div>`
+        : `<div class="playlist-thumb"><i class="ti ti-music"></i></div>`;
 
     item.innerHTML = `
       ${thumbEl}
@@ -367,9 +353,7 @@ function togglePlaylist(pl, item) {
   if ($("btn-preview")) $("btn-preview").disabled = count < 2;
 }
 
-// ============================================================
 // PREVIEW DA FILA
-// ============================================================
 async function showPreview() {
   const modal = $("modal-preview");
   const body = $("preview-body");
@@ -410,9 +394,7 @@ async function showPreview() {
   };
 }
 
-// ============================================================
 // HISTÓRICO DE MISTURAS
-// ============================================================
 async function showHistory() {
   const modal = $("modal-history");
   const body = $("history-body");
@@ -491,9 +473,7 @@ async function repeatMix(entry) {
   }
 }
 
-// ============================================================
 // INICIAR FLUXO
-// ============================================================
 async function startFlow() {
   if (startFlowInProgress) return;
   startFlowInProgress = true;
@@ -532,9 +512,7 @@ async function startFlow() {
   }
 }
 
-// ============================================================
 // RESET DE ESTADO
-// ============================================================
 function resetSelectState() {
   selectedPlaylists.clear();
   searchQuery = "";
@@ -564,9 +542,7 @@ function resetSelectState() {
   }
 }
 
-// ============================================================
 // TELA: DJ RODANDO
-// ============================================================
 function bindPlaying() {
   const handleStop = async () => {
     await send("STOP_DJ");
