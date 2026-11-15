@@ -1,5 +1,12 @@
 // CONFIGURAÇÃO
-const CLIENT_ID = "SEU_CLIENT_ID_AQUI";
+// CLIENT_ID vem de config.js (não versionado). Veja config.example.js.
+let CLIENT_ID_ERROR = null;
+try {
+  importScripts("config.js");
+} catch {
+  CLIENT_ID_ERROR =
+    "config.js não encontrado. Copie config.example.js para config.js e coloque o Client ID do seu app do Spotify.";
+}
 const REDIRECT_URI = chrome.identity.getRedirectURL();
 const SCOPES = [
   "playlist-read-private",
@@ -66,6 +73,9 @@ async function authenticate() {
 }
 
 async function runSpotifyAuthFlow() {
+  if (CLIENT_ID_ERROR) throw new Error(CLIENT_ID_ERROR);
+  if (typeof CLIENT_ID !== "string" || CLIENT_ID.includes("SEU_CLIENT_ID"))
+    throw new Error("Defina o CLIENT_ID em config.js.");
   const verifier = generateCodeVerifier();
   const challenge = await generateCodeChallenge(verifier);
   await chrome.storage.local.set({ code_verifier: verifier });
@@ -84,7 +94,10 @@ async function runSpotifyAuthFlow() {
       { url: authUrl, interactive: true },
       async (redirectUrl) => {
         if (chrome.runtime.lastError || !redirectUrl) {
-          reject(chrome.runtime.lastError?.message || "Auth cancelada");
+          const detail = chrome.runtime.lastError?.message || "Auth cancelada";
+          reject(
+            `${detail}\nSe a tela do Spotify não abriu, confira se este Redirect URI está cadastrado no app: ${REDIRECT_URI}`,
+          );
           return;
         }
         const code = new URL(redirectUrl).searchParams.get("code");
@@ -120,7 +133,12 @@ async function exchangeCode(code, verifier) {
       code_verifier: verifier,
     }),
   });
-  if (!res.ok) throw new Error("Falha ao trocar código por token");
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(
+      `Falha ao trocar código por token (${res.status}): ${detail}`,
+    );
+  }
   return res.json();
 }
 
@@ -200,10 +218,10 @@ async function spotifyGet(path) {
   return body;
 }
 
-async function spotifyPost(path, body) {
+async function spotifyPost(path, body, method = "POST") {
   const token = await getAccessToken();
   const res = await fetch(`https://api.spotify.com/v1${path}`, {
-    method: "POST",
+    method,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -325,8 +343,54 @@ async function addToQueue(uri) {
   return res.ok;
 }
 
+async function listDevices() {
+  try {
+    const data = await spotifyGet("/me/player/devices");
+    return data?.devices?.filter((d) => d.id && !d.is_restricted) ?? [];
+  } catch {
+    return null; // endpoint indisponível: segue sem device_id
+  }
+}
+
+// Garante um dispositivo Spotify para tocar. Se não houver nenhum,
+// abre o web player numa aba e espera ele aparecer como dispositivo.
+async function ensureDevice() {
+  let devices = await listDevices();
+  if (devices === null) return null;
+  if (!devices.length) {
+    await chrome.tabs.create({ url: "https://open.spotify.com/", active: true });
+    for (let i = 0; i < 10 && !devices.length; i++) {
+      await new Promise((r) => setTimeout(r, 1500));
+      devices = (await listDevices()) ?? [];
+    }
+  }
+  if (!devices.length) {
+    throw new Error(
+      "Nenhum dispositivo Spotify encontrado. Abrimos o web player (open.spotify.com): entre na conta, aperte play em qualquer música e tente de novo.",
+    );
+  }
+  const device = devices.find((d) => d.is_active) ?? devices[0];
+  if (!device.is_active) {
+    await spotifyPost("/me/player", { device_ids: [device.id], play: false }, "PUT");
+    await new Promise((r) => setTimeout(r, 800));
+  }
+  return device.id;
+}
+
 async function playTrack(uri) {
-  await spotifyPost("/me/player/play", { uris: [uri] });
+  const deviceId = await ensureDevice();
+  const query = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : "";
+  const res = await spotifyPost(
+    `/me/player/play${query}`,
+    { uris: [uri] },
+    "PUT",
+  );
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(
+      `Não foi possível iniciar a reprodução (${res.status}). Abra o Spotify em algum dispositivo. ${detail}`,
+    );
+  }
 }
 
 // UTILITÁRIOS DE ALEATORIEDADE

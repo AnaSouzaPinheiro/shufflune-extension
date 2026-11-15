@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "Shufflune",
   "version": "1.0.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6q2sgYeQBFrK5pFQjqr0zQQ+cpcKr9XPIt2K54sOoqd6xDLG83sf4FkeSdlpw0uAxVR5IAwOB1K71v8T1MqdYte2b2/a73jE8dye2aVg5pGkenkVnN/9S8BpjoxmayhxouORl0fCkSVHPovSTChaSuYHv+6LJ8ILYBuk2d9A+F5XCvwWxgoUZ2CqztPS5DVPe1naz02qgyK2N4lEuwdwUoIlnYvsnsfm3s0EavmwBpA1GHHnHq52R6g6ly5lac7ZiQbD+1uih9GKiVAJtXbOHcxGktX24tTBtyV178Sr3b59MoP4vTjMLCZHVvmyEeDpo762NUI7lQhGbuXgRx4I/QIDAQAB",
   "description": "DJ inteligente que combina suas playlists do Spotify em um fluxo contínuo.",
   "permissions": [
     "storage",

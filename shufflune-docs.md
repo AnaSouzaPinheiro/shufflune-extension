@@ -462,10 +462,10 @@ Para remover essas restrições, é necessário solicitar **Extended Quota Mode*
 
 ### Configuração do Client ID
 
-No `background.js`, linha 2:
+Copie `config.example.js` para `config.js` (ignorado pelo git) e defina:
 
 ```javascript
-const CLIENT_ID = 'seu_client_id_aqui';
+const CLIENT_ID = "seu_client_id_aqui";
 ```
 
 ### Uso
